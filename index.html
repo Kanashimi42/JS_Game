@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            background-color: #343444;
+        }
+
+        .projectile {
+            z-index: 2;
+            width: 50px;
+            height: 50px;
+            background-color: red;
+            position: absolute;
+        }
+
+        .randomDiv {
+            width: 50px;
+            height: 50px;
+            background-color: green;
+            position: absolute;
+        }
+    </style>
+    <title>Move Projectile</title>
+</head>
+
+<body>
+
+    <div class="projectile" id="myProjectile"></div>
+    <div id="backgroundText"></div>
+    <script>
+        var backgroundText = document.getElementById("backgroundText");
+        function isColliding(element1, element2) {
+            var rect1 = element1.getBoundingClientRect();
+            var rect2 = element2.getBoundingClientRect();
+
+            return !(rect1.right < rect2.left ||
+                rect1.left > rect2.right ||
+                rect1.bottom < rect2.top ||
+                rect1.top > rect2.bottom);
+        }
+        function getRandomNumber(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+        var numberOfDivs = 5;
+        function createRand() {
+            for (var i = 0; i < numberOfDivs; i++) {
+                var newDiv = document.createElement("div");
+                newDiv.className = "randomDiv";
+                newDiv.id = "myrandomDiv";
+                var randomX = getRandomNumber(0, window.innerWidth - 50);
+                var randomY = getRandomNumber(0, window.innerHeight - 50);
+                newDiv.style.left = randomX + "px";
+                newDiv.style.top = randomY + "px";
+                document.body.appendChild(newDiv);
+            }
+        }
+        createRand();
+        var score = 0;
+        var isStart = true;
+        if (isStart) { var targets = document.querySelectorAll(".randomDiv"); isStart = false; };
+        var projectile = document.getElementById("myProjectile");
+        var randomDiv = document.getElementById("myrandomDiv");
+        var isMouseDown = false;
+        var targets = 0;
+        function updateTextAndBackground() {
+            var newText = "Time " + time + " Score " + score;
+            var T_Color = "white";
+            backgroundText.innerText = newText;
+            backgroundText.style.color = T_Color;
+            function shoot(event) {
+                var targets = document.querySelectorAll(".randomDiv");
+                targets.forEach(function (randomDiv) {
+                    if (isColliding(projectile, randomDiv)) {
+                        randomDiv.remove();
+                        score++;
+                    }
+                });
+                if (isMouseDown) {
+                    projectile.style.display = "none";
+                    setTimeout(function () { projectile.style.display = "block"; }, 500);
+                    console.log("Количество элементов с классом 'target':", targets.length);
+                    if (targets.length <= 0) {
+                        createRand();
+                    }
+                }
+            }
+            document.addEventListener("mousedown", shoot);
+
+            projectile.addEventListener("mousedown", function (event) {
+                setTimeout(function () { isMouseDown = true; }, 100);
+
+                var startX = event.clientX;
+                var startY = event.clientY;
+                var initialX = projectile.offsetLeft;
+                var initialY = projectile.offsetTop;
+                var offsetX = startX - initialX;
+                var offsetY = startY - initialY;
+
+                function moveProjectile(event) {
+                    if (isMouseDown) {
+                        projectile.style.left = event.clientX - offsetX + "px";
+                        projectile.style.top = event.clientY - offsetY + "px";
+                    }
+                }
+
+                document.addEventListener("mousemove", moveProjectile);
+            });
+        }
+        var time = 0;
+        updateTextAndBackground();
+        console.log("Количество элементов с классом 'target':", targets.length);
+
+        setInterval(function () {
+            updateTextAndBackground();
+            time++;
+            console.log("Прошло времени:", time);
+        }, 1000);
+
+    </script>
+
+</body>
+
+</html>
